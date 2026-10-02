@@ -38,6 +38,13 @@ class StructuralChunker(BaseChunker):
         # Extract sections with heading hierarchy
         sections = self._extract_sections(text)
 
+        # Issue #56: a document with no headings yields no sections and was
+        # silently dropped from the index. Treat the whole document as one
+        # section so it flows through the same size logic as any other
+        # section (single chunk when it fits, semantic sub-chunking when not).
+        if not sections:
+            sections = [{"content": text.strip(), "path": [], "level": 0}]
+
         chunks = []
         for section in sections:
             heading_path = " > ".join(section["path"])
